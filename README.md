@@ -139,18 +139,6 @@ src/
 └── styles/              # Global CSS
 ```
 
----
-
-## 📊 Milestones
-
-- ✅ **M1-M7:** Authentication, backup, and API integration
-- ✅ **M8-M9:** Playlist fetching and validation
-- ✅ **M10:** Playlist creation in destination account
-- ✅ **M11:** Track restoration with batching
-- ✅ **M12:** Liked songs restore to library
-- ✅ **M13:** Results dashboard and JSON export
-
----
 
 ## 🔐 Security
 
@@ -206,30 +194,13 @@ The app handles Spotify's rate limits automatically:
 - Delay between batches: 300ms
 - Automatic retry on rate limit
 
----
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Report bugs via GitHub Issues
-- Suggest features via GitHub Discussions
-- Submit PRs for improvements
-
----
 
 ## 📄 License
 
 MIT License - see LICENSE file for details
 
----
 
-## 🙏 Acknowledgments
-
-- Spotify Web API documentation
-- React and TypeScript communities
-- Vercel for seamless deployment
-
----
 
 ## 📧 Support
 
@@ -238,6 +209,4 @@ For issues, questions, or suggestions:
 2. Create a new issue with details
 3. Include browser console errors if applicable
 
----
 
-**Happy backing up! 🎵**
