@@ -6,84 +6,84 @@
 // ─── Shared types ─────────────────────────────────────────────
 
 export interface SpotifyImage {
-  url:    string
-  width:  number | null
-  height: number | null
+  url: string;
+  width: number | null;
+  height: number | null;
 }
 
 export interface SpotifyFollowers {
-  total: number
+  total: number;
 }
 
 export interface SpotifyExternalUrls {
-  spotify: string
+  spotify: string;
 }
 
 // Generic paginated response wrapper used by all list endpoints
 export interface SpotifyPage<T> {
-  items:    T[]
-  total:    number
-  limit:    number
-  offset:   number
-  next:     string | null
-  previous: string | null
-  href:     string
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+  next: string | null;
+  previous: string | null;
+  href: string;
 }
 
 // ─── User ─────────────────────────────────────────────────────
 
 export interface SpotifyUser {
-  id:            string
-  display_name:  string | null
-  email:         string
-  images:        SpotifyImage[]
-  product:       'premium' | 'free' | 'open' | string
-  country:       string
-  followers:     SpotifyFollowers
-  external_urls: SpotifyExternalUrls
+  id: string;
+  display_name: string | null;
+  email: string;
+  images: SpotifyImage[];
+  product: "premium" | "free" | "open" | string;
+  country: string;
+  followers: SpotifyFollowers;
+  external_urls: SpotifyExternalUrls;
 }
 
 // ─── Playlist types ───────────────────────────────────────────
 
 export interface SpotifyPlaylistOwner {
-  id:            string
-  display_name:  string | null
-  external_urls: SpotifyExternalUrls
-  type:          string
+  id: string;
+  display_name: string | null;
+  external_urls: SpotifyExternalUrls;
+  type: string;
 }
 
 // Renamed from TracksRef → ItemsRef in the February 2026 API update
 export interface SpotifyPlaylistItemsRef {
-  href:  string
-  total: number
+  href: string;
+  total: number;
 }
 
 export interface SpotifyPlaylist {
-  id:            string
-  name:          string
-  description:   string | null
-  owner:         SpotifyPlaylistOwner
-  public:        boolean | null
-  collaborative: boolean
-  items?:        SpotifyPlaylistItemsRef   // absent for playlists you follow but don't own
-  images:        SpotifyImage[]
-  snapshot_id:   string
-  external_urls: SpotifyExternalUrls
+  id: string;
+  name: string;
+  description: string | null;
+  owner: SpotifyPlaylistOwner;
+  public: boolean | null;
+  collaborative: boolean;
+  items?: SpotifyPlaylistItemsRef; // absent for playlists you follow but don't own
+  images: SpotifyImage[];
+  snapshot_id: string;
+  external_urls: SpotifyExternalUrls;
 }
 
 // ─── Track / Episode types (used inside playlist items) ───────
 
 export interface SpotifyArtist {
-  id:   string
-  name: string
-  external_urls: SpotifyExternalUrls
+  id: string;
+  name: string;
+  external_urls: SpotifyExternalUrls;
 }
 
 export interface SpotifyAlbum {
-  id:     string
-  name:   string
-  images: SpotifyImage[]
-  external_urls: SpotifyExternalUrls
+  id: string;
+  name: string;
+  images: SpotifyImage[];
+  external_urls: SpotifyExternalUrls;
 }
 
 /**
@@ -100,22 +100,23 @@ export interface SpotifyAlbum {
  *   linked_from = the original URI that should be used for restore
  */
 export interface SpotifyTrack {
-  type:         'track'
-  id:           string | null   // null for local files
-  name:         string
-  uri:          string
-  is_local:     boolean
-  is_playable?: boolean         // absent = assume playable; false = blocked in user's region
-  duration_ms:  number
-  explicit:     boolean
-  artists:      SpotifyArtist[]
-  album:        SpotifyAlbum
-  linked_from?: {               // Present when track was relinked due to regional restriction
-    uri: string
-    id:  string
-  }
-  external_ids?: { isrc?: string }
-  external_urls: SpotifyExternalUrls
+  type: "track";
+  id: string | null; // null for local files
+  name: string;
+  uri: string;
+  is_local: boolean;
+  is_playable?: boolean; // absent = assume playable; false = blocked in user's region
+  duration_ms: number;
+  explicit: boolean;
+  artists: SpotifyArtist[];
+  album: SpotifyAlbum;
+  linked_from?: {
+    // Present when track was relinked due to regional restriction
+    uri: string;
+    id: string;
+  };
+  external_ids?: { isrc?: string };
+  external_urls: SpotifyExternalUrls;
 }
 
 /**
@@ -124,17 +125,17 @@ export interface SpotifyTrack {
  * to music playlists via the API.
  */
 export interface SpotifyEpisode {
-  type:         'episode'
-  id:           string
-  name:         string
-  uri:          string
-  duration_ms:  number
-  description:  string
+  type: "episode";
+  id: string;
+  name: string;
+  uri: string;
+  duration_ms: number;
+  description: string;
   show: {
-    id:   string
-    name: string
-  }
-  external_urls: SpotifyExternalUrls
+    id: string;
+    name: string;
+  };
+  external_urls: SpotifyExternalUrls;
 }
 
 /**
@@ -148,10 +149,10 @@ export interface SpotifyEpisode {
  *   null           — track was deleted or is completely unavailable
  */
 export interface PlaylistItem {
-  added_at: string | null
-  added_by: { id: string } | null
-  is_local: boolean     // true when this item is a local file
-  item:     SpotifyTrack | SpotifyEpisode | null  // renamed from 'track' in Feb 2026
+  added_at: string | null;
+  added_by: { id: string } | null;
+  is_local: boolean; // true when this item is a local file
+  item: SpotifyTrack | SpotifyEpisode | null; // renamed from 'track' in Feb 2026
 }
 
 /**
@@ -164,38 +165,39 @@ export interface PlaylistItem {
  *  'unavailable' → geo-restricted track — try linked_from.uri during restore
  *  'null'        → deleted / totally unavailable — skip during restore
  */
-export type TrackKind = 'track' | 'local' | 'episode' | 'unavailable' | 'null'
+export type TrackKind = "track" | "local" | "episode" | "unavailable" | "null";
 
 /** Classify a PlaylistItem into one of the TrackKind values */
 export function classifyItem(playlistItem: PlaylistItem): TrackKind {
-  if (!playlistItem.item)                                  return 'null'
-  if (playlistItem.is_local || playlistItem.item.is_local) return 'local'
-  if (playlistItem.item.type === 'episode')                return 'episode'
-  const t = playlistItem.item as SpotifyTrack
-  if (t.is_playable === false)                             return 'unavailable'
-  return 'track'
+  if (!playlistItem.item) return "null";
+  if (playlistItem.is_local) return "local";
+  if (playlistItem.item.type === "episode") return "episode";
+  const t = playlistItem.item as SpotifyTrack;
+  if (t.is_local) return "local";
+  if (t.is_playable === false) return "unavailable";
+  return "track";
 }
 
 /** Format duration from milliseconds to m:ss */
 export function formatDuration(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${minutes}:${String(seconds).padStart(2, '0')}`
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 // ─── Fetch helpers ────────────────────────────────────────────
 
-const BASE = 'https://api.spotify.com/v1'
+const BASE = "https://api.spotify.com/v1";
 
 function authHeader(token: string): HeadersInit {
-  return { Authorization: `Bearer ${token}` }
+  return { Authorization: `Bearer ${token}` };
 }
 
-let spotifyReadBlockedUntil = 0
+let spotifyReadBlockedUntil = 0;
 
 function wait(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function spotifyReadFetch(
@@ -203,38 +205,39 @@ async function spotifyReadFetch(
   accessToken: string,
   maxRetries: number = 2,
 ): Promise<Response> {
-  let attempt = 0
+  let attempt = 0;
 
   while (attempt <= maxRetries) {
-    const now = Date.now()
+    const now = Date.now();
     if (spotifyReadBlockedUntil > now) {
-      await wait(spotifyReadBlockedUntil - now)
+      await wait(spotifyReadBlockedUntil - now);
     }
 
-    const res = await fetch(url, { headers: authHeader(accessToken) })
-    if (res.status !== 429) return res
+    const res = await fetch(url, { headers: authHeader(accessToken) });
+    if (res.status !== 429) return res;
 
-    const retryAfter = Number(res.headers.get('Retry-After') ?? '5')
-    spotifyReadBlockedUntil = Date.now() + (retryAfter + 1) * 1000
+    const retryAfter = Number(res.headers.get("Retry-After") ?? "5");
+    spotifyReadBlockedUntil = Date.now() + (retryAfter + 1) * 1000;
 
     if (attempt === maxRetries) {
-      throw new Error(`spotify_read_429:${retryAfter}`)
+      throw new Error(`spotify_read_429:${retryAfter}`);
     }
 
-    await wait((retryAfter + 1) * 1000)
-    attempt += 1
+    await wait((retryAfter + 1) * 1000);
+    attempt += 1;
   }
 
-  throw new Error('spotify_read_429')
+  throw new Error("spotify_read_429");
 }
-
 
 // ─── User profile ─────────────────────────────────────────────
 
-export async function fetchCurrentUser(accessToken: string): Promise<SpotifyUser> {
-  const res = await fetch(`${BASE}/me`, { headers: authHeader(accessToken) })
-  if (!res.ok) throw new Error(`fetch_user_${res.status}`)
-  return res.json() as Promise<SpotifyUser>
+export async function fetchCurrentUser(
+  accessToken: string,
+): Promise<SpotifyUser> {
+  const res = await spotifyReadFetch(`${BASE}/me`, accessToken);
+  if (!res.ok) throw new Error(`fetch_user_${res.status}`);
+  return res.json() as Promise<SpotifyUser>;
 }
 
 // ─── Playlists list ───────────────────────────────────────────
@@ -247,33 +250,38 @@ export async function fetchAllPlaylists(
   accessToken: string,
   onProgress?: (fetched: number, total: number) => void,
 ): Promise<SpotifyPlaylist[]> {
-  const all: SpotifyPlaylist[] = []
-  const LIMIT = 50
-  let offset = 0
-  let total  = Infinity
+  const all: SpotifyPlaylist[] = [];
+  const LIMIT = 50;
+  let offset = 0;
+  let total = Infinity;
 
   while (offset < total) {
     const params = new URLSearchParams({
-      limit:  String(LIMIT),
+      limit: String(LIMIT),
       offset: String(offset),
-    })
+    });
 
-    const res = await spotifyReadFetch(`${BASE}/me/playlists?${params}`, accessToken)
+    const res = await spotifyReadFetch(
+      `${BASE}/me/playlists?${params}`,
+      accessToken,
+    );
 
-    if (!res.ok) throw new Error(`fetch_playlists_${res.status}`)
+    if (!res.ok) throw new Error(`fetch_playlists_${res.status}`);
 
-    const page = (await res.json()) as SpotifyPage<SpotifyPlaylist | null>
-    total = page.total
+    const page = (await res.json()) as SpotifyPage<SpotifyPlaylist | null>;
+    total = page.total;
 
     // Filter out null items — items (track list) being absent is NORMAL for followed playlists
-    const validItems = page.items.filter((p): p is SpotifyPlaylist => p !== null)
-    all.push(...validItems)
-    onProgress?.(all.length, total)
-    offset += page.items.length
-    if (!page.next) break
+    const validItems = page.items.filter(
+      (p): p is SpotifyPlaylist => p !== null,
+    );
+    all.push(...validItems);
+    onProgress?.(all.length, total);
+    offset += page.items.length;
+    if (!page.next) break;
   }
 
-  return all
+  return all;
 }
 
 // ─── Playlist tracks ──────────────────────────────────────────
@@ -293,43 +301,43 @@ export async function fetchAllPlaylists(
  */
 export async function fetchAllPlaylistTracks(
   accessToken: string,
-  playlistId:  string,
+  playlistId: string,
   onProgress?: (fetched: number, total: number) => void,
 ): Promise<PlaylistItem[]> {
-  const all:  PlaylistItem[] = []
-  const LIMIT = 100   // Maximum allowed for playlist items endpoint
-  let offset  = 0
-  let total   = Infinity
+  const all: PlaylistItem[] = [];
+  const LIMIT = 100; // Maximum allowed for playlist items endpoint
+  let offset = 0;
+  let total = Infinity;
 
   while (offset < total) {
     const params = new URLSearchParams({
-      limit:  String(LIMIT),
+      limit: String(LIMIT),
       offset: String(offset),
       // NOTE: We deliberately do NOT pass market=from_token here.
       // Passing market filters out tracks not licensed in the user's country,
       // returning them as null items instead of the real track object.
       // This caused all tracks to appear as "Deleted" in some regions (e.g. Bangladesh).
       // Without market, Spotify returns the full track object for all items regardless of region.
-    })
+    });
 
     const res = await fetch(`${BASE}/playlists/${playlistId}/items?${params}`, {
       headers: authHeader(accessToken),
-    })
+    });
 
-    if (!res.ok) throw new Error(`fetch_tracks_${res.status}`)
+    if (!res.ok) throw new Error(`fetch_tracks_${res.status}`);
 
-    const page = (await res.json()) as SpotifyPage<PlaylistItem | null>
-    total = page.total
+    const page = (await res.json()) as SpotifyPage<PlaylistItem | null>;
+    total = page.total;
 
     // Null items can appear when a track was deleted from Spotify entirely
-    const valid = page.items.filter((i): i is PlaylistItem => i !== null)
-    all.push(...valid)
-    onProgress?.(all.length, total)
-    offset += page.items.length
-    if (!page.next) break
+    const valid = page.items.filter((i): i is PlaylistItem => i !== null);
+    all.push(...valid);
+    onProgress?.(all.length, total);
+    offset += page.items.length;
+    if (!page.next) break;
   }
 
-  return all
+  return all;
 }
 
 // ─── Liked Songs (Saved Tracks) ──────────────────────────────
@@ -342,8 +350,8 @@ export async function fetchAllPlaylistTracks(
  * Saved tracks are ALWAYS SpotifyTrack — never episodes or null.
  */
 export interface SavedTrack {
-  added_at: string       // ISO 8601 UTC — "2023-04-15T10:22:33Z"
-  track:    SpotifyTrack // Always a real track — no episodes in liked songs
+  added_at: string; // ISO 8601 UTC — "2023-04-15T10:22:33Z"
+  track: SpotifyTrack; // Always a real track — no episodes in liked songs
 }
 
 /**
@@ -366,34 +374,37 @@ export async function fetchAllLikedSongs(
   accessToken: string,
   onProgress?: (fetched: number, total: number) => void,
 ): Promise<SavedTrack[]> {
-  const all:  SavedTrack[] = []
-  const LIMIT = 50   // Maximum allowed by GET /me/tracks
-  let offset  = 0
-  let total   = Infinity
+  const all: SavedTrack[] = [];
+  const LIMIT = 50; // Maximum allowed by GET /me/tracks
+  let offset = 0;
+  let total = Infinity;
 
   while (offset < total) {
     const params = new URLSearchParams({
-      limit:  String(LIMIT),
+      limit: String(LIMIT),
       offset: String(offset),
-    })
+    });
 
-    const res = await spotifyReadFetch(`${BASE}/me/tracks?${params}`, accessToken)
+    const res = await spotifyReadFetch(
+      `${BASE}/me/tracks?${params}`,
+      accessToken,
+    );
 
-    if (!res.ok) throw new Error(`fetch_liked_${res.status}`)
+    if (!res.ok) throw new Error(`fetch_liked_${res.status}`);
 
-    const page = (await res.json()) as SpotifyPage<SavedTrack | null>
-    total = page.total
+    const page = (await res.json()) as SpotifyPage<SavedTrack | null>;
+    total = page.total;
 
     // Filter out any null items (shouldn't happen but be safe)
     const valid = page.items.filter(
-      (i): i is SavedTrack => i !== null && i.track !== null
-    )
-    all.push(...valid)
-    onProgress?.(all.length, total)
+      (i): i is SavedTrack => i !== null && i.track !== null,
+    );
+    all.push(...valid);
+    onProgress?.(all.length, total);
 
-    offset += page.items.length
-    if (!page.next) break
+    offset += page.items.length;
+    if (!page.next) break;
   }
 
-  return all
+  return all;
 }

@@ -24,18 +24,18 @@
  *     (Spotify's own playlist track limit)
  */
 
-const BASE = 'https://api.spotify.com/v1'
+const BASE = "https://api.spotify.com/v1";
 
 function authHeader(token: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  }
+    "Content-Type": "application/json",
+  };
 }
 
 // ── Polite delay between consecutive write calls ──────────────
 export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // ── Rate-limit-aware fetch wrapper ────────────────────────────
@@ -45,27 +45,30 @@ export function delay(ms: number): Promise<void> {
  * Throws after maxRetries consecutive 429 responses.
  */
 async function spotifyFetch(
-  url:        string,
-  options:    RequestInit,
+  url: string,
+  options: RequestInit,
   maxRetries: number = 3,
 ): Promise<Response> {
-  let attempt = 0
+  let attempt = 0;
 
   while (attempt <= maxRetries) {
-    const res = await fetch(url, options)
+    const res = await fetch(url, options);
 
-    if (res.status !== 429) return res
+    if (res.status !== 429) return res;
 
     // 429 — rate limited
-    const retryAfter = Number(res.headers.get('Retry-After') ?? '2')
-    if (attempt === maxRetries) throw new Error(`restore_429: Rate limit hit too many times. Retry after ${retryAfter}s.`)
+    const retryAfter = Number(res.headers.get("Retry-After") ?? "2");
+    if (attempt === maxRetries)
+      throw new Error(
+        `restore_429: Rate limit hit too many times. Retry after ${retryAfter}s.`,
+      );
 
     // Wait for Spotify's requested back-off time (+100ms buffer)
-    await delay((retryAfter + 0.1) * 1000)
-    attempt++
+    await delay((retryAfter + 0.1) * 1000);
+    attempt++;
   }
 
-  throw new Error('restore_429: Exceeded retry limit')
+  throw new Error("restore_429: Exceeded retry limit");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -75,63 +78,69 @@ async function spotifyFetch(
 // ─────────────────────────────────────────────────────────────
 
 export interface CreatePlaylistOptions {
-  name:          string
-  description:   string
+  name: string;
+  description: string;
   /** Whether the playlist is public. Defaults to false (private). */
-  isPublic:      boolean
+  isPublic: boolean;
   /**
    * Collaborative playlists must be private (Spotify enforces this).
    * If collaborative=true AND isPublic=true was in the backup, we
    * silently flip isPublic to false and warn the caller.
    */
-  collaborative: boolean
+  collaborative: boolean;
 }
 
 export interface CreatedPlaylist {
-  id:   string    // New Spotify playlist ID on the destination account
-  name: string
-  url:  string    // Spotify open URL for the new playlist
+  id: string; // New Spotify playlist ID on the destination account
+  name: string;
+  url: string; // Spotify open URL for the new playlist
   /** True if we had to override public→private to satisfy collaborative requirement */
-  publicOverridden: boolean
+  publicOverridden: boolean;
 }
 
 export async function createPlaylist(
   accessToken: string,
-  opts:        CreatePlaylistOptions,
+  opts: CreatePlaylistOptions,
 ): Promise<CreatedPlaylist> {
   // Spotify rule: collaborative playlists must be private
-  const publicOverridden = opts.collaborative && opts.isPublic
-  const isPublic = publicOverridden ? false : opts.isPublic
+  const publicOverridden = opts.collaborative && opts.isPublic;
+  const isPublic = publicOverridden ? false : opts.isPublic;
 
   const body = {
-    name:          opts.name.trim() || 'Untitled Playlist',
-    description:   opts.description ?? '',
-    public:        isPublic,
+    name: opts.name.trim() || "Untitled Playlist",
+    description: opts.description ?? "",
+    public: isPublic,
     collaborative: opts.collaborative,
-  }
+  };
 
-  const res = await spotifyFetch(
-    `${BASE}/me/playlists`,
-    {
-      method:  'POST',
-      headers: authHeader(accessToken),
-      body:    JSON.stringify(body),
-    },
-  )
+  const res = await spotifyFetch(`${BASE}/me/playlists`, {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: JSON.stringify(body),
+  });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({} as { error?: { message?: string } }))
-    const spotifyMsg = (body as { error?: { message?: string } })?.error?.message ?? ""
-    throw new Error(`create_playlist_${res.status}${spotifyMsg ? ":" + spotifyMsg : ""}`)
+    const body = await res
+      .json()
+      .catch(() => ({}) as { error?: { message?: string } });
+    const spotifyMsg =
+      (body as { error?: { message?: string } })?.error?.message ?? "";
+    throw new Error(
+      `create_playlist_${res.status}${spotifyMsg ? ":" + spotifyMsg : ""}`,
+    );
   }
 
-  const pl = (await res.json()) as { id: string; name: string; external_urls: { spotify: string } }
+  const pl = (await res.json()) as {
+    id: string;
+    name: string;
+    external_urls: { spotify: string };
+  };
   return {
-    id:               pl.id,
-    name:             pl.name,
-    url:              pl.external_urls.spotify,
+    id: pl.id,
+    name: pl.name,
+    url: pl.external_urls.spotify,
     publicOverridden,
-  }
+  };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -144,7 +153,7 @@ export async function createPlaylist(
 // ─────────────────────────────────────────────────────────────
 
 export interface AddTracksResult {
-  snapshot_id: string
+  snapshot_id: string;
 }
 
 /**
@@ -154,46 +163,52 @@ export interface AddTracksResult {
  */
 export async function addTracksToPlaylist(
   accessToken: string,
-  playlistId:  string,
-  uris:        string[],   // max 100
+  playlistId: string,
+  uris: string[], // max 100
 ): Promise<AddTracksResult> {
-  if (uris.length === 0) return { snapshot_id: '' }
+  if (uris.length === 0) return { snapshot_id: "" };
   if (uris.length > 100) {
-    throw new Error('addTracksToPlaylist: max 100 URIs per call — split into batches first')
+    throw new Error(
+      "addTracksToPlaylist: max 100 URIs per call — split into batches first",
+    );
   }
 
   const res = await spotifyFetch(
     `${BASE}/playlists/${encodeURIComponent(playlistId)}/items`,
     {
-      method:  'POST',
+      method: "POST",
       headers: authHeader(accessToken),
-      body:    JSON.stringify({ uris }),
+      body: JSON.stringify({ uris }),
     },
-  )
+  );
 
   if (!res.ok) {
-    const rawText = await res.text().catch(() => '')
-    let spotifyMsg = ''
-    let spotifyReason = ''
+    const rawText = await res.text().catch(() => "");
+    let spotifyMsg = "";
+    let spotifyReason = "";
     try {
-      const errBody = JSON.parse(rawText) as { error?: { status?: number; message?: string; reason?: string } }
-      spotifyMsg   = errBody?.error?.message ?? ''
-      spotifyReason = errBody?.error?.reason  ?? ''
-    } catch { /* ignore */ }
-    const detail = [spotifyMsg, spotifyReason].filter(Boolean).join(' / ')
-    throw new Error(`add_tracks_${res.status}${detail ? ':' + detail : ''}`)
+      const errBody = JSON.parse(rawText) as {
+        error?: { status?: number; message?: string; reason?: string };
+      };
+      spotifyMsg = errBody?.error?.message ?? "";
+      spotifyReason = errBody?.error?.reason ?? "";
+    } catch {
+      /* ignore */
+    }
+    const detail = [spotifyMsg, spotifyReason].filter(Boolean).join(" / ");
+    throw new Error(`add_tracks_${res.status}${detail ? ":" + detail : ""}`);
   }
 
-  return res.json() as Promise<AddTracksResult>
+  return res.json() as Promise<AddTracksResult>;
 }
 
 // ─────────────────────────────────────────────────────────────
 // CHUNK HELPER  — splits an array into groups of N
 // ─────────────────────────────────────────────────────────────
 export function chunk<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = []
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
-  return out
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -208,33 +223,42 @@ export function chunk<T>(arr: T[], size: number): T[][] {
 
 /**
  * Saves up to 50 track URIs to the authenticated user's Liked Songs library.
+ * IMPORTANT: Spotify 2026 API — URIs must be sent as query parameters, not in body.
  * Throws on any non-2xx response (caller handles retry logic).
  */
 export async function saveLikedSongs(
   accessToken: string,
-  uris:        string[],   // max 50
+  uris: string[], // max 50
 ): Promise<void> {
-  if (uris.length === 0)  return
+  if (uris.length === 0) return;
   if (uris.length > 50) {
-    throw new Error('saveLikedSongs: max 50 URIs per call — split into batches first')
+    throw new Error(
+      "saveLikedSongs: max 50 URIs per call — split into batches first",
+    );
   }
 
-  const res = await spotifyFetch(
-    `${BASE}/me/library`,
-    {
-      method:  'PUT',
-      headers: authHeader(accessToken),
-      body:    JSON.stringify({ uris }),
-    },
-  )
+  // Spotify 2026: URIs go as query parameters, comma-separated
+  const params = new URLSearchParams();
+  params.append("uris", uris.join(","));
+
+  const res = await spotifyFetch(`${BASE}/me/library?${params.toString()}`, {
+    method: "PUT",
+    headers: authHeader(accessToken),
+  });
 
   if (!res.ok) {
-    const rawText = await res.text().catch(() => '')
-    let detail = ''
+    const rawText = await res.text().catch(() => "");
+    let detail = "";
     try {
-      const body = JSON.parse(rawText) as { error?: { message?: string; reason?: string } }
-      detail = [body?.error?.message, body?.error?.reason].filter(Boolean).join(' / ')
-    } catch { /* ignore */ }
-    throw new Error(`save_liked_${res.status}${detail ? ':' + detail : ''}`)
+      const body = JSON.parse(rawText) as {
+        error?: { message?: string; reason?: string };
+      };
+      detail = [body?.error?.message, body?.error?.reason]
+        .filter(Boolean)
+        .join(" / ");
+    } catch {
+      /* ignore */
+    }
+    throw new Error(`save_liked_${res.status}${detail ? ":" + detail : ""}`);
   }
 }
