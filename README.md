@@ -2,7 +2,7 @@
 
 A modern web application that allows users to backup their Spotify playlists and liked songs, then restore them to any account. Perfect for preserving your music collection and sharing playlists across accounts.
 
-**🌍Web Link:https://spotify-backup-1iz5.vercel.app/index.html
+\*\*🌍Web Link:https://spotify-backup-1iz5.vercel.app/index.html
 
 ---
 
@@ -32,9 +32,27 @@ A modern web application that allows users to backup their Spotify playlists and
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start (For Everyone)
+
+### Just Want to Use It? ✓
+
+**No setup needed!** Go to: **https://spotify-backup-1iz5.vercel.app**
+
+1. Click **"Login with Spotify"**
+2. Authorize the app
+3. Backup, restore, and export your playlists!
+
+**Requirements:**
+
+- A Spotify account (free or premium)
+- Web browser
+
+---
+
+## 🛠️ For Developers (Local Development)
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - A [Spotify Developer Account](https://developer.spotify.com/dashboard)
 - Two Spotify accounts (source and destination for restore)
@@ -42,12 +60,14 @@ A modern web application that allows users to backup their Spotify playlists and
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Mohammadhabibullah0070/spotify-backup.git
    cd spotify-backup
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -59,11 +79,13 @@ A modern web application that allows users to backup their Spotify playlists and
    - Copy your **Client ID**
 
 4. **Configure environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env`:
+
    ```env
    VITE_SPOTIFY_CLIENT_ID=your_client_id_here
    VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback
@@ -76,10 +98,11 @@ A modern web application that allows users to backup their Spotify playlists and
      - `https://your-deployed-url/callback` (for production)
 
 6. **Start development server**
+
    ```bash
    npm run dev
    ```
-   
+
    Open http://127.0.0.1:3000 in your browser
 
 ---
@@ -87,12 +110,14 @@ A modern web application that allows users to backup their Spotify playlists and
 ## 📖 How to Use
 
 ### Backup Flow
+
 1. **Login** with your source Spotify account
 2. **Fetch Playlists** - App retrieves all your playlists
 3. **Fetch Liked Songs** - Downloads your liked songs
 4. **Export Backup** - Download backup as JSON file
 
 ### Restore Flow
+
 1. **Import Backup** - Upload your previously exported JSON backup
 2. **Login to Destination Account** - Switch to the account you want to restore to
 3. **Create Playlists** - Recreates all playlists in destination account
@@ -101,6 +126,7 @@ A modern web application that allows users to backup their Spotify playlists and
 6. **View Results** - Check detailed statistics and success rates
 
 ### Advanced Features
+
 - **Dual Account Support** - Keep source and destination accounts logged in simultaneously
 - **Partial Restore** - Skip creating playlists, just restore tracks
 - **Results Export** - Download restore results as JSON for analysis
@@ -139,7 +165,6 @@ src/
 └── styles/              # Global CSS
 ```
 
-
 ## 🔐 Security
 
 - **No Server Storage** - All data stays in your browser
@@ -153,6 +178,7 @@ src/
 ## 🚀 Deployment
 
 ### Deploy to Vercel (Recommended)
+
 1. Push code to GitHub
 2. Go to https://vercel.com
 3. Import your GitHub repository
@@ -162,6 +188,7 @@ src/
 5. Deploy (automatic on push)
 
 ### Deploy to Netlify
+
 Similar process - import from GitHub and add environment variables.
 
 ---
@@ -169,17 +196,20 @@ Similar process - import from GitHub and add environment variables.
 ## 🐛 Troubleshooting
 
 ### "redirect_uri mismatch" Error
+
 - Ensure `VITE_SPOTIFY_REDIRECT_URI` matches exactly in:
   - `.env` file (local) or Vercel env vars (production)
   - Spotify Dashboard Redirect URIs
 
 ### "Login failed" Error
+
 - Check browser console for detailed error
 - Verify Client ID is correct
 - Clear browser cookies and try again
 - Ensure two different accounts are used for source/destination
 
 ### Tracks Not Restoring
+
 - Some tracks may be unavailable in destination region
 - Local files cannot be transferred (Spotify limitation)
 - Check results panel for detailed failure reasons
@@ -190,23 +220,19 @@ Similar process - import from GitHub and add environment variables.
 ## 📝 API Rate Limits
 
 The app handles Spotify's rate limits automatically:
+
 - Batch size: 100 tracks per request
 - Delay between batches: 300ms
 - Automatic retry on rate limit
-
-
 
 ## 📄 License
 
 MIT License - see LICENSE file for details
 
-
-
 ## 📧 Support
 
 For issues, questions, or suggestions:
+
 1. Check existing [GitHub Issues](https://github.com/Mohammadhabibullah0070/spotify-backup/issues)
 2. Create a new issue with details
 3. Include browser console errors if applicable
-
-
