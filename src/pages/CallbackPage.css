@@ -28,7 +28,9 @@
 
 /* Spinning loader ring */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .callback-page__spinner {
@@ -55,6 +57,17 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   max-width: 32ch;
+}
+
+.callback-page__error-code {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  margin: var(--space-2) 0;
+  word-break: break-all;
 }
 
 .callback-page__btn {

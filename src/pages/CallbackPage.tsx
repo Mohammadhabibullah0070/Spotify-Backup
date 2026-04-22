@@ -11,133 +11,164 @@
  *  7. Redirect to /
  */
 
-import { useEffect, useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
-import { exchangeCodeForTokens } from '../lib/spotifyAuth'
-import { fetchCurrentUser } from '../lib/spotifyApi'
+import { useEffect, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { exchangeCodeForTokens } from "../lib/spotifyAuth";
+import { fetchCurrentUser } from "../lib/spotifyApi";
 import {
   loadCodeVerifier,
   loadNonce,
   clearCodeVerifier,
   clearNonce,
   type StoredTokens,
-} from '../lib/storage'
-import type { OAuthState } from '../lib/spotifyAuth'
-import './CallbackPage.css'
+} from "../lib/storage";
+import { parseErrorMessage } from "../lib/errorCodes";
+import type { OAuthState } from "../lib/spotifyAuth";
+import "./CallbackPage.css";
 
-type Status = 'loading' | 'error'
+type Status = "loading" | "error";
 
 export default function CallbackPage() {
-  const { setAccount } = useAuth()
-  const [status, setStatus]       = useState<Status>('loading')
-  const [errorMsg, setErrorMsg]   = useState<string>('')
+  const { setAccount } = useAuth();
+  const [status, setStatus] = useState<Status>("loading");
+  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [errorCode, setErrorCode] = useState<string>("");
 
   useEffect(() => {
-    const params   = new URLSearchParams(window.location.search)
-    const code     = params.get('code')
-    const stateRaw = params.get('state')
-    const error    = params.get('error')   // e.g. 'access_denied'
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const stateRaw = params.get("state");
+    const error = params.get("error"); // e.g. 'access_denied'
 
     // ── User denied access ─────────────────────────────────────
     if (error) {
+      const parsed = parseErrorMessage(
+        error === "access_denied"
+          ? new Error("access_denied: user_declined_permissions")
+          : new Error(error),
+      );
+      setErrorCode(parsed.code);
       setErrorMsg(
-        error === 'access_denied'
-          ? 'You declined the Spotify permissions. Please try again.'
-          : `Spotify returned an error: ${error}`
-      )
-      setStatus('error')
-      return
+        error === "access_denied"
+          ? 'You declined the Spotify permissions.\n\n💡 To use this app, you need to approve access to your playlists, liked songs, and library. Click "Allow" next time, or try logging in again.'
+          : `Spotify returned an error: ${error}\n\n💡 ${parsed.recovery || "Try logging in again."}`,
+      );
+      setStatus("error");
+      return;
     }
 
     // ── Missing params ─────────────────────────────────────────
     if (!code || !stateRaw) {
-      setErrorMsg('Missing code or state parameter. Did Spotify redirect correctly?')
-      setStatus('error')
-      return
+      setErrorCode("auth_pkce_failed");
+      setErrorMsg(
+        "Missing code or state parameter.\n\n💡 This usually means Spotify did not redirect correctly. Try refreshing the page and logging in again.",
+      );
+      setStatus("error");
+      return;
     }
 
     // ── Parse state ────────────────────────────────────────────
-    let oauthState: OAuthState
+    let oauthState: OAuthState;
     try {
-      oauthState = JSON.parse(stateRaw) as OAuthState
+      oauthState = JSON.parse(stateRaw) as OAuthState;
     } catch {
-      setErrorMsg('Could not parse OAuth state. Please try logging in again.')
-      setStatus('error')
-      return
+      setErrorCode("auth_pkce_failed");
+      setErrorMsg(
+        "Could not parse OAuth state.\n\n💡 Try clearing your browser cache and logging in again. If this persists, check the troubleshooting guide.",
+      );
+      setStatus("error");
+      return;
     }
 
-    const { role, nonce } = oauthState
+    const { role, nonce } = oauthState;
 
     // ── CSRF nonce check ───────────────────────────────────────
-    const savedNonce = loadNonce(role)
+    const savedNonce = loadNonce(role);
     if (!savedNonce || savedNonce !== nonce) {
-      setErrorMsg('Security check failed (nonce mismatch). Please try logging in again.')
-      setStatus('error')
-      return
+      setErrorCode("auth_pkce_failed");
+      setErrorMsg(
+        "Security check failed (nonce mismatch).\n\n💡 Your session may have expired or been interrupted. Try logging in again.",
+      );
+      setStatus("error");
+      return;
     }
 
     // ── Load code verifier ─────────────────────────────────────
-    const codeVerifier = loadCodeVerifier(role)
+    const codeVerifier = loadCodeVerifier(role);
     if (!codeVerifier) {
-      setErrorMsg('Code verifier not found. Please try logging in again.')
-      setStatus('error')
-      return
+      setErrorCode("auth_pkce_failed");
+      setErrorMsg(
+        "Code verifier not found.\n\n💡 Try clearing your browser storage (cache/cookies) and logging in again.",
+      );
+      setStatus("error");
+      return;
     }
 
     // ── Exchange code for tokens ────────────────────────────────
-    ;(async () => {
+    (async () => {
       try {
-        const tokenResponse = await exchangeCodeForTokens(code, codeVerifier)
+        const tokenResponse = await exchangeCodeForTokens(code, codeVerifier);
 
         const tokens: StoredTokens = {
-          accessToken:  tokenResponse.access_token,
+          accessToken: tokenResponse.access_token,
           refreshToken: tokenResponse.refresh_token,
-          expiresAt:    Date.now() + tokenResponse.expires_in * 1000,
-        }
+          expiresAt: Date.now() + tokenResponse.expires_in * 1000,
+        };
 
         // Fetch the user's Spotify profile
-        const user = await fetchCurrentUser(tokenResponse.access_token)
+        const user = await fetchCurrentUser(tokenResponse.access_token);
 
         // Save to context + localStorage
-        setAccount(role, tokens, user)
+        setAccount(role, tokens, user);
 
         // Clean up session storage (these are single-use)
-        clearCodeVerifier(role)
-        clearNonce(role)
+        clearCodeVerifier(role);
+        clearNonce(role);
 
         // Redirect to home
-        window.location.href = '/'
+        window.location.href = "/";
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        setErrorMsg(`Login failed: ${msg}`)
-        setStatus('error')
+        const parsed = parseErrorMessage(err);
+        setErrorCode(parsed.code);
+        setErrorMsg(
+          `Login failed: ${parsed.message}${parsed.recovery ? `\n\n💡 ${parsed.recovery}` : ""}`,
+        );
+        setStatus("error");
       }
-    })()
-  }, [setAccount])
+    })();
+  }, [setAccount]);
 
   // ── Render ──────────────────────────────────────────────────
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="callback-page">
         <div className="callback-page__card">
           <div className="callback-page__spinner" aria-hidden="true" />
           <h1 className="callback-page__title">Connecting to Spotify…</h1>
           <p className="callback-page__desc">
-            Exchanging your authorization code for tokens. This only takes a moment.
+            Exchanging your authorization code for tokens. This only takes a
+            moment.
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="callback-page">
       <div className="callback-page__card callback-page__card--error">
-        <span className="callback-page__icon" aria-hidden="true">⚠️</span>
+        <span className="callback-page__icon" aria-hidden="true">
+          ⚠️
+        </span>
         <h1 className="callback-page__title">Login failed</h1>
         <p className="callback-page__desc">{errorMsg}</p>
-        <a href="/" className="callback-page__btn">← Back to home</a>
+        {errorCode && (
+          <p className="callback-page__error-code">Error code: {errorCode}</p>
+        )}
+        <a href="/" className="callback-page__btn">
+          ← Back to home
+        </a>
       </div>
     </div>
-  )
+  );
 }
