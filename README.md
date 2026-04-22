@@ -1,131 +1,164 @@
 # Spotify Backup
 
-A modern, secure web application that lets you backup your Spotify library (playlists + liked songs) and restore it to any account. Perfect for preserving your music collection, switching accounts, or sharing playlists across Spotify profiles.
+Backup your Spotify library (playlists + liked songs) and restore to any account. Simple, secure, no setup needed.
 
 **Live app:** https://spotify-backup-1iz5.vercel.app
 
 ---
 
-## ✨ Features
+## Features
 
-- **🔐 Secure Authentication** — OAuth2 with PKCE (no passwords stored)
-- **💾 Complete Backup** — Export all playlists, tracks, and liked songs to a single JSON file
-- **🔄 Smart Restore** — Recreate your entire library in any Spotify account
-- **📊 Results Dashboard** — Detailed stats and logs from each operation
-- **📥 Export to JSON** — Download backups and results for archiving or analysis
-- **♻️ Batch Processing** — Efficiently handles large libraries (10,000+ tracks)
-- **📱 Responsive Design** — Works on desktop, tablet, and mobile
-- **🚀 100% Client-Side** — No server, no ads, no tracking—all in your browser
+- 🔐 **Secure OAuth2 Auth** — No passwords stored
+- 💾 **Complete Backup** — Export all playlists, tracks, and liked songs as JSON
+- 🔄 **Smart Restore** — Recreate your library in any Spotify account
+- 📊 **Results Dashboard** — See what restored and what failed
+- 📱 **Responsive** — Works on desktop, tablet, and mobile
+- 🚀 **100% Client-Side** — No server, no tracking
+
+---
+
+## For Users
+
+### Option 1: Use the Pre-Deployed App (No Setup)
+
+Go to: **https://spotify-backup-1iz5.vercel.app** (This deployment uses my Spotify credentials)
+
+1. Click **"Login with Spotify"** and grant permissions
+2. Click **"Backup"** to download your library as JSON
+3. To restore: import JSON, login with destination account, click **"Restore"**
+
+You just need two Spotify accounts (free or premium).
+
+### Option 2: Self-Host (Requires Spotify Developer Setup)
+
+If you want to run your own version, follow the Developer setup below.
+
+---
+
+## For Developers
+
+### Self-Hosting / Local Development
+
+**Required:** Node.js 18+, and your own Spotify Developer Account
+
+```bash
+# Clone and install
+git clone https://github.com/Mohammadhabibullah0070/spotify-backup.git
+cd spotify-backup
+npm install
+
+# Get Spotify Client ID from https://developer.spotify.com/dashboard
+
+# Configure
+cp .env.example .env.local
+# Edit .env.local with your Client ID
+
+# Add this to Spotify Dashboard → Redirect URIs:
+# http://127.0.0.1:3000/callback
+
+# Run
+npm run dev
+# Open http://127.0.0.1:3000
+```
+
+### Commands
+
+```bash
+npm run dev       # Start dev server
+npm run build     # Build for production
+npm run preview   # Preview production build
+```
+
+### Project Structure
+
+```
+src/
+├── components/  # UI Components
+├── context/     # React Context (Auth, Backup)
+├── hooks/       # Custom React hooks
+├── lib/         # Utilities (API, auth, storage)
+├── pages/       # Page components
+└── styles/      # Global CSS
+```
+
+See [.CONTRIBUTING.md](./.CONTRIBUTING.md) for detailed architecture and contributing guidelines.
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **"redirect_uri mismatch"** | Use `127.0.0.1` (not localhost). Match `.env.local` exactly with Spotify Dashboard settings. |
+| **"PKCE" or "nonce" errors** | Clear browser storage (DevTools → Application → Clear all). Refresh and try again. |
+| **Permission/scope errors** | Disconnect account, log back in, and click **Allow** when permissions screen appears. |
+| **Token expired** | Click the account card and log back in. |
+| **Missing playlists** | Spotify-generated playlists (Release Radar, Discover Weekly) can't be backed up (API limitation). |
+| **Some tracks not restored** | Tracks unavailable in your region or local files (not transferable) are skipped. Check results. |
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React 18.3 + TypeScript 5.6
-- **Build:** Vite 5.4
-- **Styling:** CSS3 (no external UI libraries)
-- **API:** Spotify Web API (Feb 2026)
-- **Auth:** OAuth2 with PKCE
-- **Storage:** Browser LocalStorage only
-- **Hosting:** Vercel
+React 18 • TypeScript 5 • Vite 5 • CSS3 • Spotify Web API • OAuth2 with PKCE
 
 ---
 
-## Quick Start
+## Security
 
-### For Users (Just Want to Use It)
-
-No installation needed!
-
-1. Go to: https://spotify-backup-1iz5.vercel.app
-2. Click **"Login with Spotify"** → Grant permissions
-3. Backup your library (saved as JSON)
-4. Create a new JSON import to restore to another account
-
-**Requirements:**
-
-- A Spotify account (free or premium)
-- Web browser (Chrome, Firefox, Safari, Edge)
-- No special software or extensions needed
+- ✅ No server — all data stays in your browser
+- ✅ No passwords stored — only Spotify sees credentials
+- ✅ No tracking, ads, or data collection
+- ✅ Open source — audit the code yourself
 
 ---
 
-## How It Works
+## FAQ
 
-### Backup (3 steps)
+**Q: Is my data safe?**  
+A: Yes. Everything runs in your browser. Your password is only used by Spotify.
 
-| Step          | What Happens                                                               |
-| ------------- | -------------------------------------------------------------------------- |
-| 1. **Login**  | You authenticate with Spotify via OAuth (your password is NOT shared)      |
-| 2. **Fetch**  | The app downloads your playlists and liked songs (happens in your browser) |
-| 3. **Export** | Everything is saved as a single JSON file you download                     |
+**Q: Can I restore to the same account?**  
+A: Yes, but you'll get duplicates. Use different accounts for testing.
 
-### Restore (5 steps)
+**Q: What about podcasts?**  
+A: Backed up but not restored (Spotify API limitation).
 
-| Step                        | What Happens                                                    |
-| --------------------------- | --------------------------------------------------------------- |
-| 1. **Import**               | You upload your backup JSON file                                |
-| 2. **Login to Destination** | You log in with the account you want to restore to              |
-| 3. **Create Playlists**     | The app recreates all your playlists (with original names)      |
-| 4. **Add Tracks**           | Songs are added to their playlists (100 at a time, with delays) |
-| 5. **Add Liked Songs**      | Your liked songs are saved to the destination account           |
+**Q: How do I contribute?**  
+A: See [.CONTRIBUTING.md](./.CONTRIBUTING.md).
 
 ---
 
-## Setup for Developers
-
-### Prerequisites
-
-- Node.js 18+ (`node --version`)
-- npm 8+ (`npm --version`)
-- A [Spotify Developer Account](https://developer.spotify.com/dashboard) (free)
-- Two Spotify accounts to test with (source + destination)
-
-### Installation (5 minutes)
-
-#### 1. Clone and Install
+## Deploy to Vercel
 
 ```bash
-git clone https://github.com/Mohammadhabibullah0070/spotify-backup.git
-cd spotify-backup
-npm install
+# Push to GitHub
+git push origin main
+
+# Go to vercel.com → Import Project → Connect your repo
+
+# Add environment variables:
+# VITE_SPOTIFY_CLIENT_ID=your_id
+# VITE_SPOTIFY_REDIRECT_URI=https://your-vercel-url.vercel.app/callback
+
+# Deploy → Done!
 ```
 
-#### 2. Create Your Spotify App
+---
 
-1. Go to https://developer.spotify.com/dashboard
-2. Click **"Create an App"**
-3. Accept terms → Create
-4. You'll see your **Client ID** (copy this)
+## Support & Contributing
 
-#### 3. Configure Environment
+- 🐛 **Found a bug?** Create an issue: https://github.com/Mohammadhabibullah0070/spotify-backup/issues
+- 💬 **Want to contribute?** See [.CONTRIBUTING.md](./.CONTRIBUTING.md)
+- 📚 **Architecture docs?** See [.CONTRIBUTING.md](./.CONTRIBUTING.md)
 
-```bash
-cp .env.example .env.local
-```
+---
 
-Edit `.env.local`:
+## License
 
-```env
-VITE_SPOTIFY_CLIENT_ID=YOUR_CLIENT_ID_HERE
-VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback
-```
+MIT — Free to use, modify, and distribute.
 
-#### 4. Add Redirect URI to Spotify Dashboard
-
-Go back to your Spotify app settings:
-
-- **Edit Settings** → **Redirect URIs**
-- Add: `http://127.0.0.1:3000/callback`
-- Save
-
-#### 5. Start Development Server
-
-```bash
-npm run dev
-```
-
-Open http://127.0.0.1:3000 in your browser → You should see the app!
+Built with ❤️ using React, TypeScript, and Spotify's Web API.
 
 ---
 
