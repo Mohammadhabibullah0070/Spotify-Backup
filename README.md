@@ -19,27 +19,30 @@ Backup your Spotify library (playlists + liked songs) and restore to any account
 
 ## For Users
 
-### Option 1: Use the Pre-Deployed App (No Setup)
+To use this app, you need a Spotify Developer app. The process is simple:
 
-Go to: **https://spotify-backup-1iz5.vercel.app** (This deployment uses my Spotify credentials)
+### How It Works
 
-1. Click **"Login with Spotify"** and grant permissions
-2. Click **"Backup"** to download your library as JSON
-3. To restore: import JSON, login with destination account, click **"Restore"**
+1. **Create a Spotify Developer Account** (free) at https://developer.spotify.com/dashboard
+2. **Create an app** and get your Client ID
+3. **Whitelist your Spotify accounts** (the ones you want to backup/restore from)
+4. **Setup the app** with your Client ID (see Developer section below)
+5. **Run locally** or deploy your own version
+6. **Login and backup/restore** using your whitelisted accounts
 
-You just need two Spotify accounts (free or premium).
+### Why the Dev Portal?
 
-### Option 2: Self-Host (Requires Spotify Developer Setup)
-
-If you want to run your own version, follow the Developer setup below.
+Spotify requires all apps to be whitelisted in development mode. This is a security measure. You whitelist the actual Spotify accounts you'll be using, and then they can authenticate with your app.
 
 ---
 
 ## For Developers
 
-### Self-Hosting / Local Development
+### Getting Started
 
-**Required:** Node.js 18+, and your own Spotify Developer Account
+**Required:** Node.js 18+, Spotify Developer Account
+
+Follow these steps to set up your own instance:
 
 ```bash
 # Clone and install
@@ -87,14 +90,14 @@ See [.CONTRIBUTING.md](./.CONTRIBUTING.md) for detailed architecture and contrib
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| **"redirect_uri mismatch"** | Use `127.0.0.1` (not localhost). Match `.env.local` exactly with Spotify Dashboard settings. |
-| **"PKCE" or "nonce" errors** | Clear browser storage (DevTools → Application → Clear all). Refresh and try again. |
-| **Permission/scope errors** | Disconnect account, log back in, and click **Allow** when permissions screen appears. |
-| **Token expired** | Click the account card and log back in. |
-| **Missing playlists** | Spotify-generated playlists (Release Radar, Discover Weekly) can't be backed up (API limitation). |
-| **Some tracks not restored** | Tracks unavailable in your region or local files (not transferable) are skipped. Check results. |
+| Issue                        | Solution                                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| **"redirect_uri mismatch"**  | Use `127.0.0.1` (not localhost). Match `.env.local` exactly with Spotify Dashboard settings.      |
+| **"PKCE" or "nonce" errors** | Clear browser storage (DevTools → Application → Clear all). Refresh and try again.                |
+| **Permission/scope errors**  | Disconnect account, log back in, and click **Allow** when permissions screen appears.             |
+| **Token expired**            | Click the account card and log back in.                                                           |
+| **Missing playlists**        | Spotify-generated playlists (Release Radar, Discover Weekly) can't be backed up (API limitation). |
+| **Some tracks not restored** | Tracks unavailable in your region or local files (not transferable) are skipped. Check results.   |
 
 ---
 
@@ -126,23 +129,6 @@ A: Backed up but not restored (Spotify API limitation).
 
 **Q: How do I contribute?**  
 A: See [.CONTRIBUTING.md](./.CONTRIBUTING.md).
-
----
-
-## Deploy to Vercel
-
-```bash
-# Push to GitHub
-git push origin main
-
-# Go to vercel.com → Import Project → Connect your repo
-
-# Add environment variables:
-# VITE_SPOTIFY_CLIENT_ID=your_id
-# VITE_SPOTIFY_REDIRECT_URI=https://your-vercel-url.vercel.app/callback
-
-# Deploy → Done!
-```
 
 ---
 
